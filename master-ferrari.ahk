@@ -26,17 +26,6 @@ me := Find(war, "me.png")
 if (me!=[0,0])
     liness.Push([me[1]+Xo,me[2]+Yo,me[1]+Xo,me[2]+Yo])
 
-f2::
-    toggle := !toggle
-    if (toggle) {
-        settimer,draw,10
-    } else {
-        settimer,draw,off
-        overlay.BeginDraw()
-        overlay.EndDraw()
-    }
-return
-
 draw:
     if (overlay.BeginDraw()) {
 
@@ -61,14 +50,12 @@ draw:
                     overlay.DrawLine(liness[l][3],liness[l][4],x,y,0xFFFF0000, 1)
                 }
 
-                WinGetPos, X, Y, Width, Height, Graphwar
-
                 if (l==1){
                     overlay.DrawLine(liness[l][3],liness[l][2]-20,liness[l][3],liness[l][2]+20,0xFFFF0000, 1)
                     overlay.DrawLine(liness[l][3]-20,liness[l][2],liness[l][3]+20,liness[l][2],0xFFFF0000, 1)
                 }
                 else{
-                    overlay.DrawLine(liness[l][3],0,liness[l][3],Height,0xFFFF0000, 1)
+                    overlay.DrawLine(liness[l][3],15,liness[l][3],465,0xFFFF0000, 1)
                 }
             }
 
@@ -76,38 +63,6 @@ draw:
         overlay.EndDraw()
     }
 return
-
-esc::exitapp
-
-~~LButton::
-    if (overlay.GetMousePos(x,y))
-    {
-        l:=liness.MaxIndex()
-        if (x>liness[l][3])
-        {
-            liness.Push([liness[l][3],liness[l][4],x,y])
-        }
-        else
-        {
-            liness.Pop()
-        }
-    }
-return
-~~RButton::
-    liness.Pop()
-return
-
-Backspace::
-    liness :=[]
-    overlay.Clear()
-
-    war := war()
-    if (me!=[0,0])
-        me := Find(war, "me.png")
-
-    liness.Push([me[1]+Xo,me[2]+Yo,me[1]+Xo,me[2]+Yo])
-
-Return
 
 pasteTEXT(TEXT){
     SAVED := Clipboard
@@ -124,35 +79,82 @@ adaptY(y){
     return -((y+15)/460*30-15)+2
 }
 
-Enter::
+#IfWinActive Graphwar
 
-    ans:=""
-    for k, i in liness
-    {
-        if (k!=0){
-            X1 := adaptX(liness[k][1])
-            Y1 := adaptY(liness[k][2])
-            X2 := adaptX(liness[k][3])
-            Y2 := adaptY(liness[k][4])
-
-            A := (Y2-Y1)/(X2-X1)
-            p := A . "(abs(x-(" . X1 . "))+x-(" . X1 . "))/2"
-            n := A . "(abs(" . X2 . "-x)+x-(" . X2 . "))/2"
-            ans:= ans . " +" . p . "-(" . n . ")"
+    ~~Space::
+        toggle := !toggle
+        if (toggle) {
+            settimer,draw,10
+        } else {
+            settimer,draw,off
+            overlay.BeginDraw()
+            overlay.EndDraw()
         }
-    }
+    return
 
-    ; liness :=[]
-    ; overlay.Clear()
-    CoordMode, Mouse, Relative
-    MouseMove, 220, 520
-    Sleep, 100
-    Click
-    Send, ^a
-    Sleep, 100
-    pasteTEXT(ans)
-    ; Send, %ans%
-    Sleep, 500
-    Send, {Enter}
+    esc::exitapp
 
-Return
+    ~~LButton::
+        if (overlay.GetMousePos(x,y))
+        {
+            l:=liness.MaxIndex()
+            if (x>liness[l][3])
+            {
+                liness.Push([liness[l][3],liness[l][4],x,y])
+            }
+            else
+            {
+                liness.Pop()
+            }
+        }
+    return
+    ~~RButton::
+        liness.Pop()
+    return
+
+    Backspace::
+        liness :=[]
+        overlay.Clear()
+
+        war := war()
+        if (me!=[0,0])
+            me := Find(war, "me.png")
+
+        liness.Push([me[1]+Xo,me[2]+Yo,me[1]+Xo,me[2]+Yo])
+
+    Return
+
+    Enter::
+
+        ans:=""
+        for k, i in liness
+        {
+            if (k!=0){
+                X1 := adaptX(liness[k][1])
+                Y1 := adaptY(liness[k][2])
+                X2 := adaptX(liness[k][3])
+                Y2 := adaptY(liness[k][4])
+
+                A := (Y2-Y1)/(X2-X1)
+                p := A . "(abs(x-(" . X1 . "))+x-(" . X1 . "))/2"
+                n := A . "(abs(" . X2 . "-x)+x-(" . X2 . "))/2"
+                ans:= ans . " +" . p . "-(" . n . ")"
+            }
+        }
+
+        ; liness :=[]
+        ; overlay.Clear()
+        CoordMode, Mouse, Relative
+        MouseMove, 220, 520
+        Sleep, 100
+        Click
+        Send, ^a
+        Sleep, 100
+        pasteTEXT(ans)
+        ; Send, %ans%
+        Sleep, 500
+        Send, {Enter}
+
+    Return
+
+#If
